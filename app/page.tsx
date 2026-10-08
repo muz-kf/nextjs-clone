@@ -14,7 +14,7 @@ export default function Page() {
     return (
         <section className="flex flex-col gap-2 items-center py-4">
             <img
-                className="bg-black py-2 px-4 rounded-lg bg-opacity-60 hover:bg-opacity-50"
+                className="bg-black/60 py-2 px-4 rounded-lg hover:bg-black/50"
                 alt="mFlux_logo"
                 src="/mFlux_logo.png"
                 width={150}
@@ -93,10 +93,10 @@ export default function Page() {
                 <b className="text-sm">(Based on React)</b>
             </article>
 
-            <Link href="/get-data" className="bg-black text-white btn-1">
+            <Link href="/get-data" className="bg-black/50 hover:bg-black text-white btn-1">
                 Popular Collections
             </Link>
-            <Link href="/home" className="bg-black text-white btn-1">
+            <Link href="/home" className="bg-black/50 hover:bg-black text-white btn-1">
                 Home
             </Link>
         </section>

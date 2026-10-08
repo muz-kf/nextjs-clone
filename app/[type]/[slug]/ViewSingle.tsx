@@ -67,7 +67,7 @@ export default function ViewSingle({ movie, type }: Props) {
 
                     <div className="flex flex-row flex-wrap items-center gap-2">
                         <button
-                            className="btn-1 text-black text-sm bg-white"
+                            className="btn-1 text-black text-sm bg-white/50 hover:bg-white"
                             type="button"
                             onClick={() => setIsOpen(true)}
                         >

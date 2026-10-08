@@ -2,7 +2,7 @@ type Props = {};
 
 export default function LoaderPlaceHolder({}: Props) {
     return (
-        <section className="flex absolute z-10 bg-black bg-opacity-50 min-h-[inherit] w-full items-center justify-center">
+        <section className="flex absolute z-10 bg-black/50 min-h-[inherit] w-full items-center justify-center">
             <div
                 role="status"
                 className="space-y-2.5 animate-pulse max-w-[90vw]"
