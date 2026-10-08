@@ -2,9 +2,10 @@
 module.exports = {
     reactStrictMode: false,
     images: {
-        domains: ["image.tmdb.org", "cdn.arabsstock.com", "picsum.photos"],
-    },
-    experimental: {
-        appDir: true,
+        remotePatterns: [
+            { protocol: "https", hostname: "image.tmdb.org", pathname: "/**" },
+            { protocol: "https", hostname: "cdn.arabsstock.com", pathname: "/**" },
+            { protocol: "https", hostname: "picsum.photos", pathname: "/**" },
+        ],
     },
 };

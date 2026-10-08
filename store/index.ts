@@ -38,21 +38,15 @@ export const useLocalStore = create<CacheStore, [["zustand/persist", CacheStore]
                 toast.success("Movie Removed From Favourites!");
             },
             addPerson(person) {
-                let newArray: Person[] | Crew[] = [];
-                if (get().persons.length > 0) {
-                    // @ts-ignore
-                    newArray = get().persons.filter((p) => p.id !== person.id) ?? [];
-                }
-                // @ts-ignore
+                const newArray = get().persons.filter((p) => p.id !== person.id);
                 newArray.push(person);
 
-                set((s) => ({ ...s, persons: newArray }));
+                set({ persons: newArray });
                 toast.success("Person Added To Favourites!");
             },
             removePerson(person) {
-                // @ts-ignore
-                const newArray = get().persons.filter((p) => p.id !== person.id) ?? [];
-                set((s) => ({ ...s, persons: newArray }));
+                const newArray = get().persons.filter((p) => p.id !== person.id);
+                set({ persons: newArray });
                 toast.success("Person Removed From Favourites!");
             },
             resetPersons() {
@@ -83,7 +77,7 @@ export const useLocalStore = create<CacheStore, [["zustand/persist", CacheStore]
 
 type store = {
     movies: Movie[];
-    persons: Person[] | Crew[];
+    persons: (Person | Crew)[];
 };
 
 interface CacheStore extends store {

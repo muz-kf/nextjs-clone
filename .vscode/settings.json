@@ -374,5 +374,8 @@
   // "terminal.integrated.minimumContrastRatio": 4.5
   ,
   "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+"typescript.enablePromptUseWorkspaceTsdk": true,
+"chat.tools.terminal.autoApprove": {
+   "npm audit": true
+}
 }
