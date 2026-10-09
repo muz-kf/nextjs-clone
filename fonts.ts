@@ -4,7 +4,7 @@ export const nunito = Nunito({
     display: "swap",
     preload: true,
     subsets: ["latin"],
-    weight: ["400", "400", "500", "600", "700", "800", "900"],
+    weight: ["400", "500", "600", "700", "800", "900"],
     variable: "--nunito",
 });
 
