@@ -376,6 +376,7 @@
   "typescript.tsdk": "node_modules/typescript/lib",
 "typescript.enablePromptUseWorkspaceTsdk": true,
 "chat.tools.terminal.autoApprove": {
-   "npm audit": true
+   "npm audit": true,
+   "npm run lint": true
 }
 }
