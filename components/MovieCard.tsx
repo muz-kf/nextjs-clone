@@ -61,8 +61,8 @@ export default function MovieCard({ movie, classes }: Props) {
                     {movie?.release_date || movie?.first_air_date}
                 </h1>
                 <p className="text-sm overview drop-shadow-lg">
-                    {movie?.overview?.length! >= 380
-                        ? movie?.overview?.substring(0, 380) + "..."
+                    {(movie?.overview?.length ?? 0) >= 380
+                        ? movie.overview?.substring(0, 380) + "..."
                         : movie?.overview}{" "}
                     &nbsp;
                     <Link

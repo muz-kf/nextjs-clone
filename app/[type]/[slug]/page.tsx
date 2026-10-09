@@ -1,37 +1,41 @@
-import { AxiosPromise } from "axios";
-import { Crew, DetailedMovie, Person } from "../../../@types";
+import { Metadata } from "next";
+import { Crew, DetailedMovie, Movie, PaginatedResponse, Person } from "../../../@types";
 import Error from "../../../components/Error";
 import TMDB from "../../../server/tmdb";
 import { genRandom, genTitle } from "../../../utils";
 import GenreSuggestions from "./Suggestions";
 import ViewSingle from "./ViewSingle";
 
-export const metadata = { title: genTitle("Info") };
+export const metadata :Metadata = { title: genTitle("Info") };
 
-export default async function Page({ params }: any) {
-    let { slug, type } = params;
-    type = type === "tv" ? type : "movie";
+type Props = {
+    params: Promise<{ slug: string; type: string }>;
+};
 
-    const movie: DetailedMovie | null = await getData(
-        TMDB.get(
-            `/${type ?? "movie"}/${
-                slug ?? 14325
-            }?append_to_response=videos,credits`
+export default async function Page({ params }: Props) {
+    const { slug, type: routeType } = await params;
+    const type = routeType === "tv" ? "tv" : "movie";
+
+    const movie = await getData(
+        TMDB.get<DetailedMovie>(
+            `/${type}/${slug ?? 14325}?append_to_response=videos,credits`
         ),
-        params?.slug
+        slug
     );
     if (!movie) return <Error />;
 
-    // @ts-ignore
-    movie.credits.cast = await filterArray(movie?.credits?.cast ?? []);
-    // @ts-ignore
-    movie.credits.crew = await filterArray(movie?.credits?.crew ?? []);
+    if (movie.credits) {
+        movie.credits.cast = uniqueById(movie.credits.cast ?? []);
+        movie.credits.crew = uniqueById(movie.credits.crew ?? []);
+    }
 
     const genre = movie?.genres?.[0]?.id ?? 35;
     const page = genRandom(4);
 
-    const suggestions: any = await getData(
-        TMDB.get(`/discover/${type}?with_genres=${genre}&page=1`),
+    const suggestions = await getData(
+        TMDB.get<PaginatedResponse<Movie>>(
+            `/discover/${type}?with_genres=${genre}&page=1`
+        ),
         genre
     );
 
@@ -52,23 +56,14 @@ export default async function Page({ params }: any) {
     );
 }
 
-type mix = Crew[] | Person[];
-async function filterArray(arr: mix) {
-    return new Promise<mix | []>((resolve, reject) => {
-        let queue: any[] = [];
-        for (let i = 0; i <= arr.length; i++) {
-            const current = arr[i];
-            queue.push(current);
-            if (queue.includes(current)) {
-                queue = queue.filter((v) => v?.id !== current?.id);
-                queue.push(current);
-            }
-        }
-        resolve(queue);
-    });
+function uniqueById<T extends Crew | Person>(items: T[]): T[] {
+    return Array.from(new Map(items.map((item) => [item.id, item])).values());
 }
 
-async function getData(request: AxiosPromise, slug: string | number) {
+async function getData<T>(
+    request: Promise<{ data: T }>,
+    slug: string | number
+): Promise<T | null> {
     try {
         const { data } = await request;
         return data;

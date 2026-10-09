@@ -5,7 +5,9 @@ const initialContent = <>Nothing Here!</>;
 
 const isActiveAtom = atom(false);
 const dialogContent = atom<ReactNode>(initialContent);
-const dialogActions = atom<any>({ clickAwayAction: null });
+const dialogActions = atom<{ clickAwayAction: (() => void) | null }>({
+    clickAwayAction: null,
+});
 
 export default function useModal() {
     const [isOpen, setIsOpen] = useAtom(isActiveAtom);
@@ -34,8 +36,7 @@ export default function useModal() {
         openWithContent: (content: ReactNode, clickAwayAction?: () => void) => {
             setDialogProps(content);
             setIsOpen(true);
-            if (clickAwayAction instanceof Function)
-                setAction({ clickAwayAction: clickAwayAction });
+            if (clickAwayAction) setAction({ clickAwayAction });
         },
     };
 }

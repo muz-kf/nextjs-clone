@@ -2,16 +2,14 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useCallback, useRef } from "react";
 import { BiSearchAlt } from "react-icons/bi";
 
-type Props = {};
-
-export default function Search({}: Props) {
-    const searchRef = useRef(null);
+export default function Search() {
+    const searchRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
     const handleSubmit = useCallback((e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         router.push(`/search?q=${new FormData(e.currentTarget).get("q")}&page=1`);
-    }, []);
+    }, [router]);
 
     return (
         <form onSubmit={handleSubmit} className="relative inline-flex gap-2">

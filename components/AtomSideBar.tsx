@@ -13,7 +13,6 @@ export default function AtomSideBar() {
     useClickAwayListener({
         action: sidebar.onClose,
         backDropRef: bgRef,
-        dependencies: [sidebar.isOpen],
         selector: "#sidebar",
     });
 

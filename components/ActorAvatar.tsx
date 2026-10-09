@@ -43,13 +43,9 @@ export const ActorSmallPhoto = ({ person }: Props) => {
                 {person?.name || person?.original_name}
             </span>
             <h4 className="text-gray-50 text-xs max-w-[100%]">
-                {/* @ts-ignore */}
-                {person?.character ??
-                    // @ts-ignore
-                    person?.job ??
-                    person?.known_for_department ??
-                    // @ts-ignore
-                    person?.department}
+                {"character" in person
+                    ? person.character
+                    : person.job || person.department || person.known_for_department}
             </h4>
         </div>
     );

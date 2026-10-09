@@ -12,7 +12,11 @@ export class APIResponse {
     }
 }
 
-export const genBody = (success = false, msg: string, payload: any) => {
+export const genBody = (
+    success = false,
+    msg: string,
+    payload: Record<string, unknown> = {}
+) => {
     return {
         success,
         message: msg ?? "",
@@ -25,7 +29,7 @@ async function genRes(
     code: HttpStatusCode,
     success: boolean,
     msg: string,
-    payload: any
+    payload: Record<string, unknown>
 ) {
     if (!res || !code) throw new Error("res & code is required!");
     return res.status(code).json(genBody(success, msg, payload));
@@ -47,8 +51,12 @@ export const storeVars = {
     persons: "persons",
 };
 
-export function storeData(store: Storage, field: "movies" | "persons", value: any) {
-    store.setItem(storeVars.movies, value);
+export function storeData(
+    store: Storage,
+    field: "movies" | "persons",
+    value: string
+) {
+    store.setItem(storeVars[field], value);
     return true;
 }
 
