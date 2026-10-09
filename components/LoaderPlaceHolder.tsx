@@ -1,6 +1,4 @@
-type Props = {};
-
-export default function LoaderPlaceHolder({}: Props) {
+export default function LoaderPlaceHolder() {
     return (
         <section className="flex absolute z-10 bg-black/50 min-h-[inherit] w-full items-center justify-center">
             <div

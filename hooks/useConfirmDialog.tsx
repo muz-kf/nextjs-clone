@@ -1,5 +1,5 @@
 import { atom, useAtom } from "jotai";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useCallback, useEffect } from "react";
 
 const dialogAtom = atom(false);
 
@@ -12,27 +12,28 @@ const dialogContent = atom<DialogProps>({
 
 type DialogProps = {
     message: ReactNode;
-    action: Function;
+    action: () => void;
 };
 
 export default function useConfirmDialog() {
     const [isOpen, setIsOpen] = useAtom(dialogAtom);
     const [dialogProps, setDialogProps] = useAtom(dialogContent);
+    const { action } = dialogProps;
 
-    const handleClose = (ev: KeyboardEvent) => {
+    const handleClose = useCallback((ev: KeyboardEvent) => {
         console.log("event listener call handleClose => ", ev);
         if (ev.key === "Escape") setIsOpen(false);
         if (ev.key === "Enter") {
-            dialogProps.action();
+            action();
             setIsOpen(false);
         }
-    };
+    }, [action, setIsOpen]);
 
     useEffect(() => {
         if (isOpen) document.body.addEventListener("keydown", handleClose);
         else document.body.removeEventListener("keydown", handleClose);
         return () => document.body.removeEventListener("keydown", handleClose);
-    }, [isOpen, setIsOpen]);
+    }, [handleClose, isOpen]);
 
     return {
         isOpen,
@@ -41,7 +42,7 @@ export default function useConfirmDialog() {
         onClose: () => setIsOpen(false),
         content: dialogProps,
         setDialogProps,
-        openWithContent: (message: ReactNode, action: Function) => {
+        openWithContent: (message: ReactNode, action: () => void) => {
             setDialogProps({
                 action,
                 message,

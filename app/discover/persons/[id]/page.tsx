@@ -3,63 +3,77 @@ import TMDB from "../../../../server/tmdb";
 import { genTitle } from "../../../../utils";
 import DisplayData from "../../../get-data/Client";
 import PersonPage from "./PersonPage";
+import { DetailedPerson, Movie, PaginatedResponse } from "../../../../@types";
+import { Metadata } from "next";
 
 type Props = {
-    params: {
-        id: number;
-    };
-    // searchParams?: { [key: string]: string | string[] | undefined };
-    searchParams?: any;
+    params: Promise<{ id: string }>;
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props):Promise<Metadata> {
+    const { id } = await params;
     return {
-        title: genTitle(`Person - ${params?.id ?? 0}`),
+        title: genTitle(`Person - ${id ?? 0}`),
     };
 }
 
 export default async function GetActorSSR({ params, searchParams }: Props) {
-    const { page = 1 } = searchParams;
-    const { id } = params;
+    const { page: rawPage = "1" } = await searchParams;
+    const { id } = await params;
+    const requestedPage =
+        typeof rawPage === "string" && Number.isInteger(Number(rawPage))
+            ? Math.max(1, Number(rawPage))
+            : 1;
+    let person: DetailedPerson | null = null;
+    let data: PaginatedResponse<Movie> | null = null;
+    let failed = false;
+
     try {
-        const { data: person } = await TMDB.get(`/person/${id}`);
-        let { data } = await TMDB.get(
-            `/discover/movie?with_cast=${id}&page=${page}`
+        const personResponse = await TMDB.get<DetailedPerson>(`/person/${id}`);
+        person = personResponse.data;
+        const movieResponse = await TMDB.get<PaginatedResponse<Movie>>(
+            `/discover/movie?with_cast=${id}&page=${requestedPage}`
         );
-
-        let ERR = !data || data?.results?.length <= 0;
-        if (ERR && page > data?.total_pages) {
-            const { data: result } = await TMDB.get(
-                `/discover/movie?with_cast=${id}&page=${data?.total_pages}`
+        data = movieResponse.data;
+        if (
+            data.results.length === 0 &&
+            requestedPage > (data.total_pages ?? 0) &&
+            (data.total_pages ?? 0) > 0
+        ) {
+            const lastPageResponse = await TMDB.get<PaginatedResponse<Movie>>(
+                `/discover/movie?with_cast=${id}&page=${data.total_pages}`
             );
-            data = result;
+            data = lastPageResponse.data;
         }
-        ERR = !data || data?.results?.length <= 0;
-
-        return (
-            <>
-                <PersonPage actor={person} />
-                {ERR ? (
-                    <Error
-                        message={`Unable to Fetch Page: ${page} \n Available Pages: ${
-                            data?.total_pages ?? 0
-                        }`}
-                    />
-                ) : (
-                    <>
-                        <h2 className="h4 py-2 text-center">
-                            You may also Like
-                        </h2>
-                        <DisplayData
-                            currentPage={1 + 1}
-                            items={data?.results ?? []}
-                        />
-                    </>
-                )}
-            </>
-        );
     } catch (err) {
-        console.log("Error Fetching Actor SSR: ", err);
+        console.error("Error fetching actor page:", err);
+        failed = true;
+    }
+
+    if (failed || !person) {
         return <Error message={`Person with ID: ${id} Not Found!`} />;
     }
+
+    const hasRecommendations = (data?.results.length ?? 0) > 0;
+    return (
+        <>
+            <PersonPage actor={person} />
+            {hasRecommendations ? (
+                <>
+                    <h2 className="h4 py-2 text-center">You may also Like</h2>
+                    <DisplayData
+                        currentPage={2}
+                        items={data?.results ?? []}
+                    />
+                </>
+            ) : (
+                <Error
+                    message={`Unable to Fetch Page: ${requestedPage} \n Available Pages: ${
+                        data?.total_pages ?? 0
+                    }`}
+                />
+            )}
+        </>
+    );
 }

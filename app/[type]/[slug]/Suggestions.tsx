@@ -1,11 +1,12 @@
 "use client";
 import { useCallback, useRef, useState } from "react";
+import { Movie, PaginatedResponse } from "../../../@types";
 import API from "../../../api";
 import MovieCard from "../../../components/MovieCard";
 import Loader from "../../loading";
 
 type Props = {
-    suggestions: any[];
+    suggestions: Movie[];
     genre: number | string;
     type: "movie" | "tv";
     currentPage?: number;
@@ -19,40 +20,38 @@ export default function GenreSuggestions({
     type,
     currentPage = 2,
 }: Props) {
-    const [data, setData] = useState<any[] | null>(suggestions);
+    const [data, setData] = useState<Movie[]>(suggestions);
     const [loading, setLoading] = useState(false);
     const [finished, setFinished] = useState(false);
     const page = useRef(currentPage);
-    const observer = useRef<any>();
+    const observer = useRef<IntersectionObserver | null>(null);
 
-    const lastItem = useCallback((node: any) => {
+    const lastItem = useCallback((node: HTMLDivElement | null) => {
         if (loading) return; // loading state
-        if (observer.current) observer.current?.disconnect();
+        observer.current?.disconnect();
         observer.current = new IntersectionObserver(
             async (entries) => {
                 if (entries[0]?.isIntersecting) {
-                    if (!loading) {
-                        setLoading(true);
-                        const values = await getMore({
-                            genre,
-                            page: page.current,
-                            type,
-                        });
-                        if (!values) {
-                            setFinished(true);
-                            return;
-                        }
-                        setData((c: any) => [...c, ...values?.results]);
-                        page.current++;
+                    setLoading(true);
+                    const values = await getMore({
+                        genre,
+                        page: page.current,
+                        type,
+                    });
+                    if (!values || values.results.length === 0) {
+                        setFinished(true);
                         setLoading(false);
-                        return true;
-                    } else return false;
+                        return;
+                    }
+                    setData((current) => [...current, ...values.results]);
+                    page.current++;
+                    setLoading(false);
                 }
             },
             { rootMargin: "400px" }
         );
-        if (node) return observer.current.observe(node);
-    }, []);
+        if (node) observer.current.observe(node);
+    }, [genre, loading, type]);
     return (
         <section className="col center pb-12">
             <h2 className="h4 font-bold text-center mb-2 mt-4">{title}</h2>
@@ -78,14 +77,18 @@ type params = {
     type: "movie" | "tv";
 };
 
-async function getMore({ genre, type, page }: params) {
+async function getMore({
+    genre,
+    type,
+    page,
+}: params): Promise<PaginatedResponse<Movie> | null> {
     try {
-        const { data } = await API.get(
+        const { data } = await API.get<PaginatedResponse<Movie>>(
             `/get-genres?type=${type}&genre=${genre}&page=${page}`
         );
         return data;
-    } catch (err: any) {
-        console.log("Error fetching,", err);
+    } catch (error) {
+        console.error("Error fetching suggestions:", error);
         return null;
     }
 }

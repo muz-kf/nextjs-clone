@@ -1,6 +1,4 @@
-type Props = {};
-
-export default function ScreenLoader({}: Props) {
+export default function ScreenLoader() {
     return (
         <section className="flex fixed z-50 bg-black/50 min-h-screen w-full items-center justify-center">
             <div

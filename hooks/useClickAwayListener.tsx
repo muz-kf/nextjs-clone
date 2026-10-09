@@ -3,25 +3,24 @@ import { MutableRefObject, useEffect } from "react";
 type Props = {
     backDropRef: MutableRefObject<HTMLElement | null>;
     action: () => void;
-    dependencies: any[];
     selector: string;
 };
 
 export default function useClickAwayListener({
     action,
     backDropRef,
-    dependencies,
     selector,
 }: Props) {
     useEffect(() => {
-        backDropRef.current?.addEventListener("click", (e) => {
-            // @ts-ignore
-            const self = e?.target?.closest(selector);
-            if (!self) action();
-            else return;
-        });
+        const backDrop = backDropRef.current;
+        if (!backDrop) return;
 
-        return () => backDropRef.current?.removeEventListener("click", action);
-    }, dependencies);
-    return;
+        const handleClick = (event: MouseEvent) => {
+            const target = event.target;
+            if (target instanceof Element && !target.closest(selector)) action();
+        };
+
+        backDrop.addEventListener("click", handleClick);
+        return () => backDrop.removeEventListener("click", handleClick);
+    }, [action, backDropRef, selector]);
 }

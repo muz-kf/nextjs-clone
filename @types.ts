@@ -197,11 +197,17 @@ export type Person = {
 
 export interface Movie extends initalMovie {
     first_air_date?: string;
-    id:number;
+    id: number;
     name?: string;
     original_name?: string;
     type?: string;
 }
+
+export type PaginatedResponse<T> = {
+    page?: number;
+    results: T[];
+    total_pages?: number;
+};
 
 export interface DetailedMovie extends detailedMovie {
     original_name?: string;

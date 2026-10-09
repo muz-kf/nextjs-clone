@@ -1,41 +1,42 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { Movie, PaginatedResponse } from "../../@types";
 import MovieCard from "../../components/MovieCard";
 import Loader from "../loading";
 
 type Props = {
-    items: any[] | null;
+    items: Movie[] | null;
     currentPage?: number;
 };
 
 export default function DisplayData({ items, currentPage = 2 }: Props) {
-    const [data, setData] = useState<any[] | null>(items);
+    const [data, setData] = useState<Movie[]>(items ?? []);
     const [loading, setLoading] = useState(false);
     const page = useRef(currentPage);
     const observer = useRef<IntersectionObserver>();
 
     const lastItem = useCallback((node: HTMLDivElement) => {
         if (loading) return; // loading state
-        if (observer.current) observer.current?.disconnect();
+        observer.current?.disconnect();
         observer.current = new IntersectionObserver(
             async ([entry]) => {
-                if (entry.isIntersecting) {
-                    if (true) {
-                        setLoading(true);
-                        const values = await getMore(page.current);
-                        if (!values) return;
-                        setData((c: any) => [...c, ...values?.results]);
-                        page.current++;
+                if (entry?.isIntersecting) {
+                    setLoading(true);
+                    const values = await getMore(page.current);
+                    if (!values || values.results.length === 0) {
                         setLoading(false);
-                        return true;
-                    } else return false;
+                        return;
+                    }
+                    setData((current) => [...current, ...values.results]);
+                    page.current++;
+                    setLoading(false);
                 }
             },
             { rootMargin: "400px" }
         );
-        if (node) return observer.current.observe(node);
-    }, []);
+        if (node) observer.current.observe(node);
+    }, [loading]);
 
     return (
         <section className="relative flex flex-col gap-3 items-center justify-center">
@@ -55,27 +56,15 @@ export default function DisplayData({ items, currentPage = 2 }: Props) {
     );
 }
 
-async function getMore(page: number) {
+async function getMore(page: number): Promise<PaginatedResponse<Movie> | null> {
     try {
         const response = await fetch(
             `/api/v1/get-data?type=movie&cat=popular&page=${page}`
         );
-        const data = await response.json();
-        return data;
-    } catch (err: any) {
-        console.log("Error fetching:", page, err);
+        if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+        return (await response.json()) as PaginatedResponse<Movie>;
+    } catch (error) {
+        console.error("Error fetching popular movies:", { page, error });
         return null;
     }
 }
-
-// async function getMore(page: number) {
-//     try {
-//         const { data } = await API.get(
-//             `/get-data?type=movie&cat=popular&page=${page}`
-//         );
-//         return data;
-//     } catch (err: any) {
-//         console.log("Error fetching,", err);
-//         return null;
-//     }
-// }

@@ -12,9 +12,9 @@ export const fetchData = async (request: AxiosPromise) => {
     try {
         const { data } = await request;
         return [null, data];
-    } catch (e: any) {
-        console.log("Error Fetching", e);
-        return [e, null];
+    } catch (error) {
+        console.error("Error fetching TMDB data:", error);
+        return [error, null];
     }
 };
 

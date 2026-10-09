@@ -13,7 +13,6 @@ export default function AtomModal() {
     useClickAwayListener({
         action: modal.clickAwayAction ?? modal.onClose,
         backDropRef: bg,
-        dependencies: [modal.isOpen],
         selector: "#modal",
     });
 

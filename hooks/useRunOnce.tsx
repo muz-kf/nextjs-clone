@@ -1,8 +1,6 @@
 import { useEffect, useRef } from "react";
 
-type Props = Function;
-
-export default function useRunOnce(action: Props) {
+export default function useRunOnce(action: () => void) {
     const ran = useRef(false);
 
     useEffect(() => {
@@ -13,5 +11,5 @@ export default function useRunOnce(action: Props) {
         return () => {
             ran.current = true;
         };
-    }, []);
+    }, [action]);
 }
