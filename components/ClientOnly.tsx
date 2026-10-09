@@ -16,7 +16,7 @@ export default function ClientOnly({ children }: Props) {
 
     if (!isVisible)
         return (
-            <section className="col center min-h-[100dvh]">
+            <section className="col center min-h-dvh">
                 {/* <h2 className="m-4 text-2xl font-black min-h-screen col center">Loading..</h2> */}
                 <LoadBar loading={true} />
                 <LoaderPlaceHolder />
